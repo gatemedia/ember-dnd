@@ -1,4 +1,4 @@
-ember-dnd
-=========
+gatemedia-dnd
+=============
 
 Ember.js DnD helpers
