@@ -2,20 +2,22 @@
 DnD.Droppable = Ember.Mixin.create({
 
     dragEnter: DnD.cancel,
-    dragOver: DnD.cancel,
 
-    drag: function (event) {
+    dragOver: function (event) {
         var currentCoordinates = DnD.portableCoordinates(event);
 
-        this.dragAction(currentCoordinates.x, currentCoordinates.y, event); // item cannot be get from drag event...
+        if (Ember.canInvoke(this, 'dragAction')) {
+            this.dragAction(currentCoordinates.x, currentCoordinates.y, event); // item cannot be get from drag event...
 
-        event.preventDefault();
-        return false;
+            event.preventDefault();
+            return false;
+        } else {
+            return true;
+        }
     },
 
     drop: function (event) {
-        var
-            self = this,
+        var self = this,
             positionDelta = this._computeDelta(event),
             object = this.lookupDraggable(event.dataTransfer.getData('object'));
 
@@ -32,8 +34,7 @@ DnD.Droppable = Ember.Mixin.create({
     },
 
     _computeDelta: function (event) {
-        var
-            currentCoordinates = DnD.portableCoordinates(event),
+        var currentCoordinates = DnD.portableCoordinates(event),
             originCoordinates = event.dataTransfer.getData('from').split(':');
 
         return {
@@ -47,6 +48,6 @@ DnD.Droppable = Ember.Mixin.create({
 
     /** To be overriden by droppable */
     dropAction: function (object, positionDelta, event) {
-        Ember.Logger.warn('Ignored drop action for ' + object.toString());
+        Ember.Logger.warn('DnD - Ignored drop action for ' + object.toString());
     }
 });
