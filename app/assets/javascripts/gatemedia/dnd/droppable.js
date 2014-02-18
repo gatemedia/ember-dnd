@@ -1,4 +1,3 @@
-
 DnD.Droppable = Ember.Mixin.create({
 
   dragEnter: DnD.cancel,
@@ -33,13 +32,34 @@ DnD.Droppable = Ember.Mixin.create({
     return false;
   },
 
+  touchEnter: DnD.cancel,
+  touchMove: function (event) {
+    return this.dragOver(event);
+  },
+  touchEnd: function (event) {
+    var positionDelta = this._computeDeltaTouch(event, DnD.get('lastDraggedFrom'));
+    this.dropAction({}, positionDelta, event);
+    event.preventDefault();
+    return false;
+  },
+
   _computeDelta: function (event) {
     var currentCoordinates = DnD.portableCoordinates(event),
       originCoordinates = event.dataTransfer.getData('from').split(':');
 
     return {
       dx: currentCoordinates.x - originCoordinates[0],
-      dy: currentCoordinates.y - originCoordinates[1],
+      dy: currentCoordinates.y - originCoordinates[1]
+    };
+  },
+
+  _computeDeltaTouch: function (event, lastDraggedFrom) {
+    var currentCoordinates = DnD.portableCoordinates(event),
+      originCoordinates = lastDraggedFrom.split(':');
+
+    return {
+      dx: currentCoordinates.x - originCoordinates[0],
+      dy: currentCoordinates.y - originCoordinates[1]
     };
   },
 

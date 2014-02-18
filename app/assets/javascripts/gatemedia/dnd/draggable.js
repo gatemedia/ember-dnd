@@ -1,4 +1,3 @@
-
 DnD.Draggable = Ember.Mixin.create({
   attributeBindings: 'draggable',
 
@@ -25,6 +24,20 @@ DnD.Draggable = Ember.Mixin.create({
         dataTransfer.setDragImage($('img.blank')[0], 0, 0);
       }
 
+      event.stopPropagation();
+    } else {
+      event.preventDefault();
+      return false;
+    }
+  },
+
+  touchStart: function (event) {
+    var currentCoordinates = DnD.portableCoordinates(event);
+    if (this.get('canDrag')) {
+      // Drag object.
+      var object = this.dragObject(currentCoordinates.x, currentCoordinates.y);
+      // Set last dragged from in DnD since we won't have dataTransfer for touch events.
+      DnD.set('lastDraggedFrom', '%@:%@'.fmt(currentCoordinates.x, currentCoordinates.y));
       event.stopPropagation();
     } else {
       event.preventDefault();
