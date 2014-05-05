@@ -16,8 +16,8 @@ DnD = Ember.Namespace.create({
     return false; // FF broken D&D: https://bugzilla.mozilla.org/show_bug.cgi?id=505521
   },
   touchEmulatedDragSupport: function() {
-    return 'ontouchstart' in window // works on most browsers
-      || 'onmsgesturechange' in window; // works on ie10
+    return ('ontouchstart' in window )|| // works on most browsers
+           ('onmsgesturechange' in window); // works on ie10
   },
 
   portableCoordinates: function (event) {
@@ -35,5 +35,4 @@ DnD = Ember.Namespace.create({
       };
     }
   }
-
 });
