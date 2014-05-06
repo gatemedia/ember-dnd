@@ -27,7 +27,7 @@ DnD.Draggable2 = Ember.Mixin.create({
       this.setProperties({
         dragged: true
       });
-      // Ember.tryInvoke(this, 'click', [event]);
+      Ember.tryInvoke(this, 'click', [event]);
 
       var currentCoordinates = DnD.portableCoordinates(event),
           x = currentCoordinates.x,
