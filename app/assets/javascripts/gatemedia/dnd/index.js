@@ -10,6 +10,7 @@ DnD = Ember.Namespace.create({
   },
 
   completeDragSupport: function () {
+    Ember.deprecate('completeDragSupport should no more be used');
     if (window.hasOwnProperty('chrome')) {
       return true;
     }
