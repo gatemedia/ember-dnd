@@ -1,7 +1,11 @@
 
 DnD.Draggable2 = Ember.Mixin.create({
   classNameBindings: 'draggable dragged'.w(),
-  dragged: false,
+
+  init: function() {
+    this._super();
+    this.set('dragged', false);
+  },
 
   draggable: function () {
     if (this.get('canDrag')) {
