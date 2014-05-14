@@ -47,11 +47,13 @@ DnD.Draggable2 = Ember.Mixin.create({
         zIndex: this.$().css('z-index'),
         backdrop: backdrop
       }));
-      this._sendDragEvent('dragBegin', x, y);
+      var consume = this._sendDragEvent('dragBegin', x, y);
 
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
+      if (consume) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
     }
   },
   mouseMove: function (event) {
@@ -64,12 +66,14 @@ DnD.Draggable2 = Ember.Mixin.create({
             x = currentCoordinates.x - dragMeta.get('deltaX'),
             y = currentCoordinates.y - dragMeta.get('deltaY');
 
-        this._sendDragEvent('dragMove', x, y);
-      }
+        var consume = this._sendDragEvent('dragMove', x, y);
 
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
+        if (consume) {
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        }
+      }
     }
   },
   mouseUp: function (event) {
@@ -84,12 +88,14 @@ DnD.Draggable2 = Ember.Mixin.create({
           x = currentCoordinates.x - dragMeta.get('deltaX'),
           y = currentCoordinates.y - dragMeta.get('deltaY');
 
-      this._sendDragEvent('dragEnd', x, y);
+      var consume = this._sendDragEvent('dragEnd', x, y);
       this.set('_dragMeta', null);
 
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
+      if (consume) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      }
     }
   },
 
@@ -117,7 +123,7 @@ DnD.Draggable2 = Ember.Mixin.create({
       y: y
     });
 
-    Ember.tryInvoke(this, name, [{
+    var consume = Ember.tryInvoke(this, name, [{
       x: x,
       y: y,
       fromX: fromX,
@@ -125,6 +131,11 @@ DnD.Draggable2 = Ember.Mixin.create({
       dx: x - fromX,
       dy: y - fromY
     }]);
+
+    if (Ember.isNone(consume)) {
+      return true;
+    }
+    return !consume;
   },
 
   _dragChanged: function () {
