@@ -15,87 +15,73 @@ DnD.Draggable2 = Ember.Mixin.create({
     }
   }.property('canDrag'),
 
-  mouseDown: function (event) {
-    if (this.get('canDrag')) {
-      var backdrop = Ember.$('<div></div>');
-      backdrop.prependTo(this.$());
-      backdrop.css({
-        position: 'fixed',
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 10000
-      });
+  tryDrag: function (event, binding, callback) {
+    if (event.which === 0) {
+      this.set('dragged', false);
+    } else {
+      if (this.get('canDrag')) {
+        var position,
+            coordinates = DnD.portableCoordinates(event);
 
-      this.setProperties({
-        dragged: true
-      });
-      Ember.tryInvoke(this, 'click', [event]);
+        if (this.get('dragged')) {
+          var dragMeta = this.get('_dragMeta'),
+              x = coordinates.x - dragMeta.get('deltaX'),
+              y = coordinates.y - dragMeta.get('deltaY');
 
-      var currentCoordinates = DnD.portableCoordinates(event),
-          x = currentCoordinates.x,
-          y = currentCoordinates.y,
-          deltaX = 0,
-          deltaY = 0;
+          position = this._generateDragData(x, y);
+        } else {
+          var backdrop = Ember.$('<div></div>');
+          backdrop.prependTo(this.$());
+          backdrop.css({
+            position: 'fixed',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10000
+          });
 
-      this.set('_dragMeta', Ember.Object.create({
-        fromX: x,
-        fromY: y,
-        deltaX: deltaX,
-        deltaY: deltaY,
-        zIndex: this.$().css('z-index'),
-        backdrop: backdrop
-      }));
-      var consume = this._sendDragEvent('dragBegin', x, y);
+          this.setProperties({
+            dragged: true
+          });
 
-      if (consume) {
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
-      }
-    }
-  },
-  mouseMove: function (event) {
-    if (this.get('dragged')) {
-      if (event.which === 0) {
-        this.set('dragged', false);
-      } else {
-        var currentCoordinates = DnD.portableCoordinates(event),
-            dragMeta = this.get('_dragMeta'),
-            x = currentCoordinates.x - dragMeta.get('deltaX'),
-            y = currentCoordinates.y - dragMeta.get('deltaY');
+          var deltaX = 0,
+              deltaY = 0;
 
-        var consume = this._sendDragEvent('dragMove', x, y);
+          this.set('_dragMeta', Ember.Object.create({
+            fromX: coordinates.x,
+            fromY: coordinates.y,
+            deltaX: deltaX,
+            deltaY: deltaY,
+            zIndex: this.$().css('z-index'),
+            backdrop: backdrop
+          }));
 
-        if (consume) {
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
+          position = this._generateDragData(coordinates.x, coordinates.y);
         }
+        return callback.apply(binding, [position]);
       }
     }
   },
-  mouseUp: function (event) {
-    if (this.get('dragged')) {
-      var dragMeta = this.get('_dragMeta');
+  tryDrop: function (event, binding, callback) {
+    var dragMeta = this.get('_dragMeta');
 
+    if (this.get('dragged') && dragMeta) {
       this.set('dragged', false);
       this.$().css('z-index', dragMeta.get('zIndex'));
       dragMeta.get('backdrop').remove();
 
-      var currentCoordinates = DnD.portableCoordinates(event),
-          x = currentCoordinates.x - dragMeta.get('deltaX'),
-          y = currentCoordinates.y - dragMeta.get('deltaY');
+      var coordinates = DnD.portableCoordinates(event),
+          x = coordinates.x - dragMeta.get('deltaX'),
+          y = coordinates.y - dragMeta.get('deltaY');
 
-      var consume = this._sendDragEvent('dragEnd', x, y);
-      this.set('_dragMeta', null);
+      Ember.run.next(this, function () {
+        this.set('_dragMeta', null);
+      });
 
-      if (consume) {
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
-      }
+      var position = this._generateDragData(x, y);
+
+      return callback.apply(binding, [position]);
     }
   },
 
@@ -113,7 +99,7 @@ DnD.Draggable2 = Ember.Mixin.create({
   //   }
   // },
 
-  _sendDragEvent: function (name, x, y) {
+  _generateDragData: function (x, y) {
     var dragMeta = this.get('_dragMeta'),
         fromX = dragMeta.get('fromX'),
         fromY = dragMeta.get('fromY');
@@ -122,20 +108,14 @@ DnD.Draggable2 = Ember.Mixin.create({
       x: x,
       y: y
     });
-
-    var consume = Ember.tryInvoke(this, name, [{
+    return {
       x: x,
       y: y,
       fromX: fromX,
       fromY: fromY,
       dx: x - fromX,
       dy: y - fromY
-    }]);
-
-    if (Ember.isNone(consume)) {
-      return true;
-    }
-    return !consume;
+    };
   },
 
   _dragChanged: function () {
@@ -143,10 +123,5 @@ DnD.Draggable2 = Ember.Mixin.create({
   }.observes('dragged'),
 
   /** To be implemented by draggable */
-  canDrag: true,
-
-  /** To be implemented by draggable */
-  dragBegin: Ember.K,
-  dragMove: Ember.K,
-  dragEnd: Ember.K
+  canDrag: true
 });
