@@ -35,5 +35,9 @@ DnD = Ember.Namespace.create({
         y: event.originalEvent.touches[0].y || event.originalEvent.touches[0].screenY
       };
     }
+  },
+
+  hasButtonPressed: function (event) {
+    return event.which || event.originalEvent.which;
   }
 });
