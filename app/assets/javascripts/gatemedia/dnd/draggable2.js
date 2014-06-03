@@ -16,7 +16,7 @@ DnD.Draggable2 = Ember.Mixin.create({
   }.property('canDrag'),
 
   tryDrag: function (event, binding, callback) {
-    if (event.which === 0) {
+    if ((event.which || Ember.get(event, 'originalEvent.which')) === 0) {
       this.set('dragged', false);
     } else {
       if (this.get('canDrag')) {
