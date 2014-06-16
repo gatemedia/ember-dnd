@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gatemedia-dnd (1.2.3)
+    gatemedia-dnd (1.2.4)
 
 GEM
   remote: http://rubygems.org/
