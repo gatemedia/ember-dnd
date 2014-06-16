@@ -1,19 +1,11 @@
 
 DnD.Draggable2 = Ember.Mixin.create({
-  classNameBindings: 'draggable dragged'.w(),
+  classNameBindings: 'dragged'.w(),
 
   init: function() {
     this._super();
     this.set('dragged', false);
   },
-
-  draggable: function () {
-    if (this.get('canDrag')) {
-      return 'true';
-    } else {
-      return 'false';
-    }
-  }.property('canDrag'),
 
   tryDrag: function (event, binding, callback) {
     if ((event.which || Ember.get(event, 'originalEvent.which')) === 0) {
@@ -21,11 +13,11 @@ DnD.Draggable2 = Ember.Mixin.create({
     } else {
       if (this.get('canDrag')) {
         var position,
+            dragMeta = this.get('_dragMeta'),
             coordinates = DnD.portableCoordinates(event);
 
-        if (this.get('dragged')) {
-          var dragMeta = this.get('_dragMeta'),
-              x = coordinates.x - dragMeta.get('deltaX'),
+        if (this.get('dragged') && dragMeta) {
+          var x = coordinates.x - dragMeta.get('deltaX'),
               y = coordinates.y - dragMeta.get('deltaY');
 
           position = this._generateDragData(x, y);
@@ -59,6 +51,7 @@ DnD.Draggable2 = Ember.Mixin.create({
 
           position = this._generateDragData(coordinates.x, coordinates.y);
         }
+        this.set('dragged', true);
         return callback.apply(binding, [position]);
       }
     }
@@ -67,7 +60,6 @@ DnD.Draggable2 = Ember.Mixin.create({
     var dragMeta = this.get('_dragMeta');
 
     if (this.get('dragged') && dragMeta) {
-      this.set('dragged', false);
       this.$().css('z-index', dragMeta.get('zIndex'));
       dragMeta.get('backdrop').remove();
 
@@ -83,6 +75,7 @@ DnD.Draggable2 = Ember.Mixin.create({
 
       return callback.apply(binding, [position]);
     }
+    this.set('dragged', false);
   },
 
   // touchStart: function (event) {
