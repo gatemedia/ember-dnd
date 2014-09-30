@@ -67,11 +67,8 @@ DnD.Draggable2 = Ember.Mixin.create({
           x = coordinates.x - dragMeta.get('deltaX'),
           y = coordinates.y - dragMeta.get('deltaY');
 
-      Ember.run.next(this, function () {
-        this.set('_dragMeta', null);
-      });
-
       var position = this._generateDragData(x, y);
+      this.set('_dragMeta', null);
 
       return callback.apply(binding, [position]);
     }
